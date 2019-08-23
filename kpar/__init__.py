@@ -7,7 +7,7 @@ import os
 import sys
 import yaml
 
-__version__ = '0.1'
+__version__ = '0.2'
 
 assert sys.version[0] == '3'
 

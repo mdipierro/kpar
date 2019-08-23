@@ -21,6 +21,8 @@ setuptools.setup(
     include_package_data = True,
     zip_safe = False,
     platforms = 'any',
+    install_requires=[
+        'pyyaml'],
     classifiers = [
         'Programming Language :: Python',
         'Programming Language :: Python :: 3',
