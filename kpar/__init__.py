@@ -4,12 +4,18 @@ import copy
 import inspect
 import json
 import os
+import re
 import sys
 import yaml
 
-__version__ = '0.2'
+__version__ = '0.4'
 
 assert sys.version[0] == '3'
+
+__all__ = ['Obj', 'override', 'naive', 'clone', 'to_list', 'autoparse']
+
+re_int = re.compile('^\d+$')
+re_key = re.compile('^[\w_]+$')
 
 class override(object):
     def __init__(self, true_value):
@@ -21,7 +27,7 @@ class naive(object):
 
 def clone(obj):
     if isinstance(obj, Obj):
-        return Obj({str(k): clone(obj[k]) for k in obj})
+        return Obj({keyfy(k): clone(obj[k]) for k in obj})
     return copy.deepcopy(obj)
 
 def objectify(value):
@@ -32,8 +38,15 @@ def objectify(value):
     if isinstance(value, dict):
         value = Obj(value)
     elif isinstance(value, (list, tuple)):
-        value = Obj({str(k): objectify(v) for k, v in enumerate(value)})
+        value = Obj({keyfy(k): objectify(v) for k, v in enumerate(value)})
     return value
+
+def keyfy(key):
+    if re_int.match(key):
+        return int(key)
+    elif re_key.match(key):
+        return key
+    raise KeyError("key not supported")
 
 class Obj(dict):
     definitions = collections.defaultdict(list)
@@ -47,21 +60,20 @@ class Obj(dict):
     def __init__(self, *args, **kwargs):
         items = dict(*args, **kwargs)
         for key, value in items.items():
-            key = str(key)
+            key = keyfy(key)
             self[key] = objectify(value)
     def __getitem__(self, key):
-        key = str(key)
+        key = keyfy(key)
         if not key in self:
             self[key] = Obj()
         return dict.__getitem__(self, key)
     def __setitem__(self, key, value):
-        key = str(key)
+        key = keyfy(key)
         dict.__setitem__(self, key, value)
         self.update_definitions(key)
     def __getattr__(self, key):
         return self[key]
     def __setattr__(self, key, value):
-        key = str(key)
         is_naive = isinstance(value, naive)
         is_override = isinstance(value, override)
         if key in self and not is_override:
@@ -84,6 +96,19 @@ def to_list(obj, path=''):
             s.append((path+key, value, type(value), obj.definitions[id(obj), key]))
     return s
 
+def autoparse(value):
+    if value.lower() == 'true':
+        return True
+    if value.lower() == 'false':
+        return False
+    try:
+        return int(value)
+    except ValueError:
+        try:
+            return float(value)
+        except ValueError:
+            return str(value)
+
 def load(filename):
     if filename.endswith('.yaml'):
         return Obj(yaml.load(open(filename).read(), Loader=yaml.SafeLoader))
@@ -92,5 +117,5 @@ def load(filename):
     if filename.endswith('.py'):       
         return __import__(filename[:-3].replace(os.path.sep, '.'))
     if filename.endswith('.csv'):
-        return naive([row for row in csv.reader(open(filename))])
+        return naive([list(map(autoparse, row)) for row in csv.reader(open(filename)) if row])
     return Obj()
