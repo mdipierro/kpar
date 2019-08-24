@@ -8,6 +8,9 @@ clean:
 build:	clean
 	python3 setup.py clean
 	python3 setup.py build
+test: build
+	python3 -m pip install -r requirements.txt
+	python3 -m pytest --cov=kpar -v -s tests/
 install: build
 	python3 setup.py install
 deploy:

@@ -31,7 +31,7 @@ If it seems we are describing a programming language it is because we are. Many 
 
 Here we propose to use Python for writing configuration parameters but with the addition of a specialized class that enforces some of the above requirements, `Obj`.
 
-`Obj` has the name suggests is the name of an `Obj`ect class. At its fundamental level it can be thought of as a `defaultdict` of `defaultdict`s with constant values. This is better expressed with an example:
+`Obj` has the name suggests is the name of an `Obj`ect class. At its fundamental level it can be thought of as a `defaultdict` of `defaultdict`s with immutable values. This is better expressed with an example:
 
 ```
 # file car.py
@@ -152,7 +152,7 @@ print(json.dumps({key:value for key, value, _, _ in to_list(root)}))
 The serialized parameters can be passed to a consuming application, for example a Java program.
 
 Caveat: You can assign any object to a KPar `Obj()` but it will be inejcted and recursively transformed.
-Only bool, long, float, and strings can be leafs unless a value is wrapped into `nave(...)`.
+Only bool, long, float, and strings can be leafs unless a value is wrapped into `navie(...)`.
 
 For example:
 
