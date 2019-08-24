@@ -1,6 +1,8 @@
+import argparse
 import csv
 import collections
 import copy
+import importlib.util
 import inspect
 import json
 import os
@@ -8,11 +10,11 @@ import re
 import sys
 import yaml
 
-__version__ = '0.5'
+__version__ = '0.6'
 
 assert sys.version[0] == '3'
 
-__all__ = ['Obj', 'override', 'naive', 'clone', 'to_list', 'autoparse', 'objectify']
+__all__ = ['Obj', 'load', 'override', 'naive', 'clone', 'to_list', 'autoparse', 'objectify']
 
 re_int = re.compile('^\d+$')
 re_key = re.compile('^[\w_]+$')
@@ -48,13 +50,14 @@ def keyfy(key):
         return int(key)
     elif re_key.match(key):
         return key
-    raise KeyError("key not supported")
+    raise KeyError("key %s not supported" % repr(key))
 
 
 class Obj(dict):
     """a defaultdict of defacultdicts of immutable values"""
 
-    definitions = collections.defaultdict(list)
+    _definitions = collections.defaultdict(list)
+    _root_path = None
 
     def update_definitions(self, key):
         """stores the file and line being executed, associated to (self, key)"""
@@ -62,7 +65,11 @@ class Obj(dict):
             filename = frame[1]
             if filename != __file__:
                 filename = os.path.abspath(filename)
-                self.definitions[id(self), key].append((filename, frame[2]))
+                if not Obj._root_path:
+                    Obj._root_path = os.path.dirname(filename)
+                common = os.path.commonprefix([Obj._root_path, filename])
+                relative_path = os.path.relpath(filename, common)
+                Obj._definitions[id(self), key].append((relative_path, frame[2]))
                 return
 
     def __init__(self, *args, **kwargs):
@@ -115,7 +122,7 @@ def to_list(obj, path=''):
         if isinstance(value, Obj):
             s += to_list(value, path=path+str(key)+'.')
         else:
-            s.append((path+str(key), value, type(value), obj.definitions[id(obj), key]))
+            s.append((path+str(key), value, type(value), Obj._definitions[id(obj), key]))
     return s
 
 
@@ -144,5 +151,43 @@ def load(filename, stream=None):
     if lfilename.endswith('.csv'):
         return naive([list(map(autoparse, row)) for row in csv.reader(stream) if row])
     if filename.endswith('.py'):       
-        return __import__(filename[:-3].replace(os.path.sep, '.'))
+        module_name = filename.replace(os.path.sep, '.').rstrip('.py')
+        spec = importlib.util.spec_from_file_location("kpar.temp.%s" % module_name, filename)
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+        return module
     return Obj()
+
+
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("source", help="filename:object_name to load and process")
+    parser.add_argument("--output_prefix", help="filename without extensions", default="report")
+    args = parser.parse_args()
+    filename, object_name = args.source.rsplit(':', 1)
+    obj = getattr(load(filename), object_name)
+    # generate csv
+    with open(args.output_prefix + '_types.csv', 'w') as fp:
+        writer = csv.writer(fp)
+        writer.writerow(('Name', 'Type'))
+        for row in to_list(obj):
+            writer.writerow((row[0], row[2].__name__)))
+    # generate values
+    with open(args.output_prefix + '_values.csv', 'w') as fp:
+        writer = csv.writer(fp)
+        writer.writerow(('Name', 'Value'))
+        for row in to_list(obj):
+            writer.writerow((row[0], row[1]))
+    # generate provenance
+    with open(args.output_prefix + '_provenance.csv', 'w') as fp:
+        writer = csv.writer(fp)
+        writer.writerow(('Name', 'Filname', 'LineNumber'))
+        for item in to_list(obj):
+            for filename, line in item[3]:
+                writer.writerow((row[0], filename, line))
+    # generate json
+    with open(args.output_prefix + '.json', 'w') as fp:
+        json.dump(obj, fp)
+
+if __name__ == '__main__':
+    main()

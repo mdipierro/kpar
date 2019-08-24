@@ -12,7 +12,7 @@ for k in range(root.car.body.engine.num_pistons):
     root.car.body.engine.piston[k].diameter = 8*k
 
 for k in (1,2):
-    root.car.electronics.computers[k].board = load('board_%i.py' % k).board
+    root.car.electronics.computers[k].board = load('boards/board_%i.py' % k).board
 
 root.car.specs.info = load(root.car.name + '/info.yaml')
 root.car.specs.hp_per_rpm = load(root.car.name + '/hp_rpm.csv')

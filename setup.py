@@ -21,6 +21,9 @@ setuptools.setup(
     include_package_data = True,
     zip_safe = False,
     platforms = 'any',
+    entry_points = {
+        'console_scripts': ['kpar-process=kpar:main'],
+    },
     install_requires=[
         'pyyaml'],
     classifiers = [
