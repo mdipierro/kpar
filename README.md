@@ -51,7 +51,7 @@ The code above is pure python code. We can verify it with pylint. We can run and
 There is more we can do. For example let's imagine the car has many electrical boards and each of them has its own complex set of parameters which we want to describe in its own files. For example:
 
 ```
-# file: board_1.py
+# file: boards/board_1.py
 from kpar import *
 
 # this board has a computer with a name and 3 fuses
@@ -65,7 +65,7 @@ for color in board.fuse:
 ```
 
 ```
-# file: board_2.py
+# file: boards/board_2.py
 from kpar import *
 
 # this board has a computer with a different name and fuse
@@ -84,10 +84,10 @@ Now we can read this from our main `car.py` file:
 # file: car.py
 ...
 for k in (1, 2):
-    root.car.electronics.computers[k].board = load('board_%i.py' % k).board
+    root.car.electronics.computers[k].board = load('boards/board_%i.py' % k).board
 ```
 
-Notice that the `load` method is almost like a regular Python import which returns the global environment of the loaded file. It differs from a regular Python import because the name of the file to be imported can be a string and therefore it can be constructed programmatically. 
+Notice that the `load` method is almost like a regular Python import which returns the global environment of the loaded file. It differs from a regular Python import because the name of the file to be imported can be a string and therefore it can be constructed programmatically. The path to the file is always relative to the folder of the loading file.
 
 As with normal import you can import functions and call them and they can generate configuration parameters.
 
@@ -121,13 +121,13 @@ process('example/car.py', 'root', 'example/report')
 
 This will generate:
 
-[report.json](examples/report.json): a JSON serialized version of the root object which can be fed to another program in any language that can read JSON.
+[report.json](exampls/report.json): a JSON serialized version of the root object which can be fed to another program in any language that can read JSON.
 
-[report_types.csv](examples/report_types.csv): a CSV list of parameters and their types. Diffing two of this files allows to determine if parameters have been added or deleted or if their type has changed.
+[report_types.csv](example/report_types.csv): a CSV list of parameters and their types. Diffing two of this files allows to determine if parameters have been added or deleted or if their type has changed.
 
-[report_hashes.csv](examples/report_hashes.csv): a CSV list of parameters and hashes of their value. Diffing two of these files allows checking which valus have changed.
+[report_hashes.csv](example/report_hashes.csv): a CSV list of parameters and hashes of their value. Diffing two of these files allows checking which valus have changed.
 
-[report_provenance.csv](examples/report_provenance.csv): A CSV list of parameters and where (filename, line number) they are defined.
+[report_provenance.csv](example/report_provenance.csv): A CSV list of parameters and where (filename, line number) they are defined.
 
 **Caveat**: You can assign any object to a KPar `Obj()` but it will be inejcted and recursively transformed. Only bool, long, float, and strings can be leafs unless a value is wrapped into `navie(...)`.
 

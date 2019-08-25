@@ -10,6 +10,7 @@ import os
 import re
 import sys
 import yaml
+from urllib.request import urlopen
 
 __version__ = '0.6'
 
