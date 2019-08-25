@@ -128,7 +128,13 @@ This will generate:
 
 [report_provenance.csv](example/report_provenance.csv): A CSV list of parameters and where (filename, line number) they are defined.
 
-**Caveat**: You can assign any object to a KPar `Obj()` but it will be inejcted and recursively transformed. Only bool, long, float, and strings can be leafs unless a value is wrapped into `naive(...)`.
+### Caveat 1
+
+While the root can have and arbitrary name and one can have multiple ``Obj``ects, there must be only one root since all paths are relative to the one root.
+
+### Caveat 2
+
+You can assign any object to a KPar `Obj()` but it will be injested and recursively transformed. Only bool, long, float, and strings can be leafs unless a value is wrapped into `naive(...)`.
 
 For example:
 
