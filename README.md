@@ -1,5 +1,4 @@
-## Using Python (with KPar) as a configuration system (even for non Python code)
-
+## KPar: Using Python as a configuration system (even for non Python code)
 
 Any complex software application needs to be configured using human readable and editable parameters. Examples of configurations systems are ConfigParser, Windows `.ini` files, and [Jasonnet](https://jsonnet.org/).
 
