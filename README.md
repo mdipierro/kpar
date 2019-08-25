@@ -121,7 +121,7 @@ process('example/car.py', 'root', 'example/report')
 
 This will generate:
 
-[report.json](exampls/report.json): a JSON serialized version of the root object which can be fed to another program in any language that can read JSON.
+[report.json](example/report.json): a JSON serialized version of the root object which can be fed to another program in any language that can read JSON.
 
 [report_types.csv](example/report_types.csv): a CSV list of parameters and their types. Diffing two of this files allows to determine if parameters have been added or deleted or if their type has changed.
 
