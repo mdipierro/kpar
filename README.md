@@ -124,11 +124,11 @@ This will generate:
 
 [report_types.csv](example/report_types.csv): a CSV list of parameters and their types. Diffing two of this files allows to determine if parameters have been added or deleted or if their type has changed.
 
-[report_hashes.csv](example/report_hashes.csv): a CSV list of parameters and hashes of their value. Diffing two of these files allows checking which valus have changed.
+[report_hashes.csv](example/report_hashes.csv): a CSV list of parameters and hashes of their value. Diffing two of these files allows to check which values have changed.
 
 [report_provenance.csv](example/report_provenance.csv): A CSV list of parameters and where (filename, line number) they are defined.
 
-**Caveat**: You can assign any object to a KPar `Obj()` but it will be inejcted and recursively transformed. Only bool, long, float, and strings can be leafs unless a value is wrapped into `navie(...)`.
+**Caveat**: You can assign any object to a KPar `Obj()` but it will be inejcted and recursively transformed. Only bool, long, float, and strings can be leafs unless a value is wrapped into `naive(...)`.
 
 For example:
 
@@ -151,7 +151,7 @@ root.car.test3 = naive({'a': 2, 'b': {'c': 3}})
 
 # let's see the output
 for key, value, typ, provenance in to_list(root)):
-    print(key, '=', str(value))
+    print(key, '=', repr(value))
 ```
 
 produces:
