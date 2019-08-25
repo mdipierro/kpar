@@ -2,6 +2,7 @@ import argparse
 import csv
 import collections
 import copy
+import hashlib
 import importlib.util
 import inspect
 import json
@@ -53,6 +54,13 @@ def keyfy(key):
     raise KeyError("key %s not supported" % repr(key))
 
 
+def get_top_frame():
+    """find the first frame not in this file""" 
+    for frame in inspect.stack():
+        if frame[1] != __file__:
+            return frame
+
+
 class Obj(dict):
     """a defaultdict of defacultdicts of immutable values"""
 
@@ -61,16 +69,13 @@ class Obj(dict):
 
     def update_definitions(self, key):
         """stores the file and line being executed, associated to (self, key)"""
-        for frame in inspect.stack():
-            filename = frame[1]
-            if filename != __file__:
-                filename = os.path.abspath(filename)
-                if not Obj._root_path:
-                    Obj._root_path = os.path.dirname(filename)
-                common = os.path.commonprefix([Obj._root_path, filename])
-                relative_path = os.path.relpath(filename, common)
-                Obj._definitions[id(self), key].append((relative_path, frame[2]))
-                return
+        frame = get_top_frame()
+        filename = os.path.abspath(frame[1])
+        if not Obj._root_path:
+            Obj._root_path = os.path.dirname(filename)
+        common = os.path.commonprefix([Obj._root_path, filename])
+        relative_path = os.path.relpath(filename, common)
+        Obj._definitions[id(self), key].append((relative_path, frame[2]))
 
     def __init__(self, *args, **kwargs):
         """works as a dict constructor"""
@@ -141,6 +146,7 @@ def autoparse(value):
 
 
 def load(filename, stream=None):
+    filename = os.path.join(os.path.dirname(get_top_frame()[1]), filename)
     lfilename = filename.lower()
     if stream == None and lfilename.endswith(('.yaml','.json','.csv')):
         stream = open(filename)
@@ -159,35 +165,42 @@ def load(filename, stream=None):
     return Obj()
 
 
+def process(filename, object_name, prefix):
+    obj = getattr(load(filename), object_name)
+    # generate csv
+    with open(prefix + '_types.csv', 'w') as fp:
+        writer = csv.writer(fp)
+        writer.writerow(('Name', 'Type'))
+        for row in to_list(obj):
+            writer.writerow((row[0], row[2].__name__))
+    # generate values
+    with open(prefix + '_hashes.csv', 'w') as fp:
+        writer = csv.writer(fp)
+        writer.writerow(('Name', 'HashValue'))
+        for row in to_list(obj):
+            writer.writerow((row[0], hashlib.md5(repr(row[1]).encode()).hexdigest()))
+    # generate provenance
+    with open(prefix + '_provenance.csv', 'w') as fp:
+        writer = csv.writer(fp)
+        writer.writerow(('Name', 'Filname', 'LineNumber'))
+        for row in to_list(obj):
+            for filename, line in row[3]:
+                writer.writerow((row[0], filename, line))
+    # generate json
+    with open(prefix + '.json', 'w') as fp:
+        json.dump(obj, fp)
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("source", help="filename:object_name to load and process")
     parser.add_argument("--output_prefix", help="filename without extensions", default="report")
     args = parser.parse_args()
     filename, object_name = args.source.rsplit(':', 1)
-    obj = getattr(load(filename), object_name)
-    # generate csv
-    with open(args.output_prefix + '_types.csv', 'w') as fp:
-        writer = csv.writer(fp)
-        writer.writerow(('Name', 'Type'))
-        for row in to_list(obj):
-            writer.writerow((row[0], row[2].__name__)))
-    # generate values
-    with open(args.output_prefix + '_values.csv', 'w') as fp:
-        writer = csv.writer(fp)
-        writer.writerow(('Name', 'Value'))
-        for row in to_list(obj):
-            writer.writerow((row[0], row[1]))
-    # generate provenance
-    with open(args.output_prefix + '_provenance.csv', 'w') as fp:
-        writer = csv.writer(fp)
-        writer.writerow(('Name', 'Filname', 'LineNumber'))
-        for item in to_list(obj):
-            for filename, line in item[3]:
-                writer.writerow((row[0], filename, line))
-    # generate json
-    with open(args.output_prefix + '.json', 'w') as fp:
-        json.dump(obj, fp)
+    filename = os.path.join(os.getcwd(), filename)
+    prefix = args.output_prefix
+    process(filename, object_name, prefix)
+
 
 if __name__ == '__main__':
     main()

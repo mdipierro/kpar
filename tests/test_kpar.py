@@ -4,6 +4,7 @@
 Unit tests for kpar
 """
 
+import os
 import unittest
 from io import StringIO
 from kpar import Obj, to_list, clone, override, naive, load
@@ -84,30 +85,31 @@ class TestKPar(unittest.TestCase):
         root.a.s = override("123")
         root.a.v = [4, 5, 6]
         items = to_list(root)
+        filename = os.path.basename(__file__)
         self.assertEqual(items[0][0], 'a.b')
         self.assertEqual(items[0][1], True)
         self.assertEqual(items[0][2], bool)
         self.assertEqual(len(items[0][3]), 1)
-        self.assertEqual(items[0][3][0][0], __file__)
+        self.assertEqual(items[0][3][0][0], filename)
         self.assertEqual(items[1][0], 'a.s')
         self.assertEqual(items[1][1], '123')
         self.assertEqual(items[1][2], str)
         self.assertEqual(len(items[1][3]), 2)
-        self.assertEqual(items[1][3][0][0], __file__)
-        self.assertEqual(items[1][3][1][0], __file__)
+        self.assertEqual(items[1][3][0][0], filename)
+        self.assertEqual(items[1][3][1][0], filename)
         self.assertEqual(items[2][0], 'a.v.0')
         self.assertEqual(items[2][1], 4)
         self.assertEqual(items[2][2], int)
         self.assertEqual(len(items[2][3]), 1)
-        self.assertEqual(items[2][3][0][0], __file__)
+        self.assertEqual(items[2][3][0][0], filename)
         self.assertEqual(items[3][0], 'a.v.1')
         self.assertEqual(items[3][1], 5)
         self.assertEqual(items[3][2], int)
         self.assertEqual(len(items[3][3]), 1)
-        self.assertEqual(items[3][3][0][0], __file__)
+        self.assertEqual(items[3][3][0][0], filename)
         self.assertEqual(items[4][0], 'a.v.2')
         self.assertEqual(items[4][1], 6)
         self.assertEqual(items[4][2], int)
         self.assertEqual(len(items[4][3]), 1)
-        self.assertEqual(items[4][3][0][0], __file__)
+        self.assertEqual(items[4][3][0][0], filename)
         

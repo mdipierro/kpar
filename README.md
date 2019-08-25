@@ -108,51 +108,28 @@ The root object (the name is abritrary  - yes we could have called the root "car
 can then be used to access the desired information:
 
 ```
-# file: report.py
-from kpar import *
-from car import root
-
-for key, value, typ, provenance in to_list(root):
-    print(key, repr(value), 'of type', repr(typ.__name__))
-    for filename, lineno in provenance:
-        print('  was defined in file', filename.split('/')[-1], 'at line', lineno)
+python3 -m pip install kpar
+kpar-process --output_prefix "example/report" example/car.py:root
 ```
 
-Running `report.py` produces output like the following:
+or programmatrically:
 
 ```
-car.name 'Toyota' of type 'str'
-  was defined in file car.py at line 5
-car.body.engine.num_pistons 4 of type 'int'
-  was defined in file car.py at line 6
-car.body.engine.piston.0.position.x 0 of type 'int'
-  was defined in file car.py at line 9
-...
-car.electronics.computers.1.board.name 'main car computer' of type 'str'
-  was defined in file board_1.py at line 6
-car.electronics.computers.1.board.fuse.red.max_power 10 of type 'int'
-  was defined in file board_1.py at line 7
-...
-car.electronics.computers.2.board.fuse.blue.max_power 40 of type 'int'
-  was defined in file board_2.py at line 5
-  was defined in file board_2.py at line 7
-...
+from kpar import process
+process('example/car.py', 'root', 'example/report')
 ```
 
-The output of `to_list` is serializable in JSON, YAML, and CSV and can be used to check that
-multiple runs of the code result in the same set of parameters and with the same types. You can 
-check which files have indeed been loaded/imported and which lines have been used.
+This will generate:
 
-```
-...
-import json
-print(json.dumps({key:value for key, value, _, _ in to_list(root)}))
-```
+[report.json](examples/report.json): a JSON serialized version of the root object which can be fed to another program in any language that can read JSON.
 
-The serialized parameters can be passed to a consuming application, for example a Java program.
+[report_types.csv](examples/report_types.csv): a CSV list of parameters and their types. Diffing two of this files allows to determine if parameters have been added or deleted or if their type has changed.
 
-Caveat: You can assign any object to a KPar `Obj()` but it will be inejcted and recursively transformed.
-Only bool, long, float, and strings can be leafs unless a value is wrapped into `navie(...)`.
+[report_hashes.csv](examples/report_hashes.csv): a CSV list of parameters and hashes of their value. Diffing two of these files allows checking which valus have changed.
+
+[report_provenance.csv](examples/report_provenance.csv): A CSV list of parameters and where (filename, line number) they are defined.
+
+**Caveat**: You can assign any object to a KPar `Obj()` but it will be inejcted and recursively transformed. Only bool, long, float, and strings can be leafs unless a value is wrapped into `navie(...)`.
 
 For example:
 
@@ -198,8 +175,8 @@ We support python3 only
 git clone git@github.com:mdipierro/kpar.git
 cd kpar
 make install
-cd examples
-python3 report.py > report.txt
+cd example
+kpar-process car.py:root
 ```
 
 and of course

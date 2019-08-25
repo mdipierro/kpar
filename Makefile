@@ -11,7 +11,7 @@ build:	clean
 test: build
 	python3 -m pip install -r requirements.txt
 	python3 -m pytest --cov=kpar -v -s tests/
-install: build
+install: test
 	python3 setup.py install
 deploy:
 	#http://guide.python-distribute.org/creation.html
