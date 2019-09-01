@@ -22,7 +22,7 @@ The car example perfectly illustrates some of the features that we expect from s
 
 **It should track provenance**. We should be able to ask the system why a certain parameter has the value it has (aka. where was it set).
 
-**It should be provide unit conversions**. We should be able to specify the units of numerical values and have them automatically converted to a desired standard.
+**It should provide unit conversions**. We should be able to specify the units of numerical values and have them automatically converted to a desired standard.
 
 **It should be simple and concise**. We want to minimize the typing required to write the configurations.
 
@@ -234,11 +234,12 @@ python3 -m pip install kpar
 
 ### License
 
-BSD
+[BSD](https://opensource.org/licenses/BSD-3-Clause)
 
 ### Historical origin
 
 This is a re-branding (with some cleanup) of a module that has been used
 for web2py plugin configurations since 2009.
 
-The units system is ported from https://github.com/mdipierro/buckingham
+The units system is ported from https://github.com/mdipierro/buckingham 
+but we removed the error propagation funcaionlity whch is not necessary for this application.
