@@ -2,8 +2,8 @@
 from kpar import *
 
 root = Obj()
-root.car.name = 'Toyota'
-root.car.body.engine.num_pistons=4
+root.car.name = 'supercar'
+root.car.body.engine.num_pistons = 4
 
 for k in range(root.car.body.engine.num_pistons):
     root.car.body.engine.piston[k].position.x = 0

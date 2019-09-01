@@ -37,7 +37,7 @@ Here we propose to use Python for writing configuration parameters but with the 
 from kpar import *
 
 root = Obj()
-root.car.name = 'Toyota'
+root.car.name = 'supercar'
 root.car.body.engine.num_pistons=4 
 for k in range(root.car.body.engine.num_cilinders):
     root.car.body.engine.piston[k].position.x = 0
@@ -120,13 +120,13 @@ process('example/car.py', 'root', 'example/report')
 
 This will generate:
 
-[report.json](example/report.json): a JSON serialized version of the root object which can be fed to another program in any language that can read JSON.
+[report.json](example/output/report.json): a JSON serialized version of the root object which can be fed to another program in any language that can read JSON.
 
-[report_types.csv](example/report_types.csv): a CSV list of parameters and their types. Diffing two of this files allows to determine if parameters have been added or deleted or if their type has changed.
+[report_types.csv](example/output/report_types.csv): a CSV list of parameters and their types. Diffing two of this files allows to determine if parameters have been added or deleted or if their type has changed.
 
-[report_hashes.csv](example/report_hashes.csv): a CSV list of parameters and hashes of their value. Diffing two of these files allows to check which values have changed.
+[report_hashes.csv](example/output/report_hashes.csv): a CSV list of parameters and hashes of their value. Diffing two of these files allows to check which values have changed.
 
-[report_provenance.csv](example/report_provenance.csv): A CSV list of parameters and where (filename, line number) they are defined.
+[report_provenance.csv](example/output/report_provenance.csv): A CSV list of parameters and where (filename, line number) they are defined.
 
 ### Caveat 1
 
