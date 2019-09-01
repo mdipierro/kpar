@@ -170,6 +170,46 @@ car.test2.y = 6
 car.test3 = {'a': 2, 'b': {'c': 3}}
 ```
 
+## Unit conversions
+
+KPar supports dimensional unit conversions
+
+```
+from kpar import u
+
+x = 2*u.milliyards
+y = 3*u.weeks
+z = 4*u.kilograms
+s = (x + x)*z / y**2
+t = float(s)
+```
+
+In this example x,y,z,s ar dimensional objcts, t is a double. 
+Arthmetic operations are only allowed between numerical objects with comparable dimensions.
+The python `float` operator converts the value into a numeric value in the international system. 
+
+Once a dimensional object is assigned to a kpar Obj it is automatically converted to a 
+double precision value in the Internation System and the dimensionality info is lost in the generated JSON.
+For example:
+
+```
+from kpar import u, Obj
+
+root = Obj()
+root.car.speed = 120*u.miles/u.hour
+```
+
+Notice kpar understands units both sngular and plural and allows prefixes like nano, mega, kilo, etc.
+
+You can also do explicit conversions using the % operator. 
+
+```
+root.piston.accel = (10*u.nanolightyears/u.megaweeks**2) % (u.meters/u.second**2)
+```
+
+Explicit conversions allows to convert from any units to any compatible units and raises 
+an exception when units are not compatible.
+
 ### Python versions
 
 We support python3 only
@@ -198,3 +238,5 @@ BSD
 
 This is a re-branding (with some cleanup) of a module that has been used
 for web2py plugin configurations since 2009.
+
+The units system is ported from https://github.com/mdipierro/buckingham
