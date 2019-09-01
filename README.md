@@ -22,6 +22,8 @@ The car example perfectly illustrates some of the features that we expect from s
 
 **It should track provenance**. We should be able to ask the system why a certain parameter has the value it has (aka. where was it set).
 
+**It should be provide unit conversions**. We should be able to specify the units of numerical values and have them automatically converted to a desired standard.
+
 **It should be simple and concise**. We want to minimize the typing required to write the configurations.
 
 **It should produce simple to parse output**. We want the output of our configuration system to be easy to parse in any language (not just Python) so that it can be ingested, for example, by a Java program.
